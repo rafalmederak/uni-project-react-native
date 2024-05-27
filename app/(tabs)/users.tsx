@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, FlatList, Image, Text, StyleSheet } from 'react-native';
+import { View, TextInput, FlatList, Image, Text, StyleSheet, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {User} from '../interfaces/userInterface';
+import { User } from '../interfaces/userInterface';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
@@ -16,6 +16,9 @@ const usersData: User[] = [
 
 const Users = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const colorScheme = useColorScheme();
+
+  const isDarkMode = colorScheme === 'dark';
 
   const handleSearch = (text: string) => setSearchTerm(text.toLowerCase());
 
@@ -26,22 +29,23 @@ const Users = () => {
   );
 
   const renderItem = ({ item }: { item: User }) => (
-    <ThemedView style={styles.userCard}>
+    <ThemedView style={[styles.userCard, isDarkMode && styles.userCardDark]}>
       <Image source={require('@/assets/images/usericon.png')} style={styles.userImage} />
-      <ThemedText style={styles.userName}>{item.name}</ThemedText>
-      <ThemedText style={styles.userEmail}>{item.email}</ThemedText>
-      <ThemedText style={styles.userCompany}>{item.company.name}</ThemedText>
+      <ThemedText style={[styles.userName, isDarkMode && styles.textDark]}>{item.name}</ThemedText>
+      <ThemedText style={[styles.userEmail, isDarkMode && styles.textDark]}>{item.email}</ThemedText>
+      <ThemedText style={[styles.userCompany, isDarkMode && styles.textDark]}>{item.company.name}</ThemedText>
     </ThemedView>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
       <ThemedView style={styles.searchContainer}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
           value={searchTerm}
           onChangeText={handleSearch}
           placeholder="Search..."
+          placeholderTextColor={isDarkMode ? '#ccc' : '#888'}
         />
       </ThemedView>
       <FlatList
@@ -49,7 +53,7 @@ const Users = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.usersContainer}
-        ListEmptyComponent={<Text style={styles.noUsers}>No users found.</Text>}
+        ListEmptyComponent={<Text style={[styles.noUsers, isDarkMode && styles.textDark]}>No users found.</Text>}
       />
     </SafeAreaView>
   );
@@ -59,6 +63,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#ffffff',
+  },
+  containerDark: {
+    backgroundColor: '#151718',
   },
   searchContainer: {
     alignItems: 'center',
@@ -71,10 +79,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     width: '100%',
+    backgroundColor: '#ffffff',
+    color: '#000000',
+  },
+  searchInputDark: {
+    borderColor: '#555',
+    backgroundColor: '#333333',
+    color: '#ffffff',
   },
   usersContainer: {
     justifyContent: 'space-around',
-    marginBottom: -200
   },
   userCard: {
     marginBottom: 10,
@@ -84,6 +98,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     backgroundColor: '#e4e4e4',
+  },
+  userCardDark: {
+    borderColor: '#555',
+    backgroundColor: '#333333',
   },
   userImage: {
     width: 100,
@@ -96,19 +114,26 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#000000',
   },
   userEmail: {
     marginTop: 5,
     fontSize: 16,
+    color: '#000000',
   },
   userCompany: {
     marginTop: 5,
     fontSize: 16,
+    color: '#000000',
+  },
+  textDark: {
+    color: '#ECEDEE',
   },
   noUsers: {
     textAlign: 'center',
     marginTop: 20,
     fontSize: 16,
+    color: '#000000',
   },
 });
 
