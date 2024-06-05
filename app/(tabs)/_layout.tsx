@@ -32,6 +32,15 @@ export default function TabLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="users"
+        options={{
+          title: 'Users',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
