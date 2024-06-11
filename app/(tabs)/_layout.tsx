@@ -43,6 +43,16 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+        name="posts"
+        options={{
+          title: 'Posts',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
+        <Tabs.Screen
           name="photos"
           options={{
             title: 'Photos',
