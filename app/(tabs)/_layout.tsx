@@ -88,6 +88,15 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="albums" // Dodaj nową zakładkę dla Albums
+          options={{
+            title: 'Albums',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'albums' : 'albums-outline'} color={color} />
+            ),
+          }}
+        />
       </Tabs>
     </DataProvider>
   );
