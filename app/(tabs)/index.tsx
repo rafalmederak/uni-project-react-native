@@ -1,70 +1,169 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useContext } from "react";
+import { View, Text, Image, StyleSheet, useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { DataContext } from "../DataContext";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const Home = () => {
+  const context = useContext(DataContext);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
-export default function HomeScreen() {
+  if (!context) {
+    return <Text>Error: Data context not found</Text>;
+  }
+
+  const { posts, users } = context;
+
+  const getUserName = (userId: number) => {
+    const user = users.find((user) => user.id === userId);
+    return user?.name || "Unknown User";
+  };
+
+  if (!posts.length) {
+    return (
+      <SafeAreaView
+        style={[styles.container, isDarkMode && styles.containerDark]}
+      >
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("@/assets/images/react-logo.png")}
+            style={styles.logo}
+          />
+          <Text style={[styles.title, isDarkMode && styles.textDark]}>
+            React Native Project Uni
+          </Text>
+        </View>
+        <View style={styles.noPostsContainer}>
+          <Text style={[styles.noPostsText, isDarkMode && styles.textDark]}>
+            No posts available
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const latestPost = posts[posts.length - 1];
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+    <SafeAreaView
+      style={[styles.container, isDarkMode && styles.containerDark]}
+    >
+      <View style={styles.logoContainer}>
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={require("@/assets/images/react-logo.png")}
+          style={styles.logo}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <Text style={[styles.title, isDarkMode && styles.textDark]}>
+          React Native Project Uni
+        </Text>
+      </View>
+      <View style={styles.postContainer}>
+        <Text style={[styles.subtitle, isDarkMode && styles.textDark]}>
+          Latest Post
+        </Text>
+        <View
+          key={latestPost.id}
+          style={[styles.post, isDarkMode && styles.postDark]}
+        >
+          <View style={styles.userInfo}>
+            <Image
+              source={require("@/assets/images/usericon.png")}
+              style={styles.userImage}
+            />
+            <Text style={isDarkMode && styles.textDark}>
+              {getUserName(latestPost.userId)}
+            </Text>
+          </View>
+          <Text style={[styles.postTitle, isDarkMode && styles.textDark]}>
+            {latestPost.title}
+          </Text>
+          <Text style={[styles.postText, isDarkMode && styles.textDark]}>
+            {latestPost.body}
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  containerDark: {
+    backgroundColor: "#151718",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  noPostsContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noPostsText: {
+    fontSize: 20,
+    color: "gray",
+  },
+  postContainer: {
+    marginTop: 20,
+  },
+  subtitle: {
+    fontSize: 20,
+    marginBottom: 10,
+    color: "#000",
+  },
+  post: {
+    width: "100%",
+    borderWidth: 3,
+    borderColor: "#090909",
+    borderRadius: 5,
+    marginVertical: 10,
+    padding: 15,
+    backgroundColor: "#e4e4e4",
+  },
+  postDark: {
+    backgroundColor: "#333",
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  userImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+    borderWidth: 3,
+    borderColor: "#61bbc7",
+  },
+  postTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+    marginBottom: 10,
+  },
+  postText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  textDark: {
+    color: "#ECEDEE",
   },
 });
+
+export default Home;
