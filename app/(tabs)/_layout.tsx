@@ -4,6 +4,7 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { DataProvider } from '@/app/DataContext';
+import Albums from './albums'; // Import komponentu Albums
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -48,6 +49,15 @@ export default function TabLayout() {
             title: 'Photos',
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon name={focused ? 'image' : 'image-outline'} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="albums" // Dodaj nową zakładkę dla Albums
+          options={{
+            title: 'Albums',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'albums' : 'albums-outline'} color={color} />
             ),
           }}
         />
