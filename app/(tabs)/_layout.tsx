@@ -77,6 +77,15 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="albums"
+          options={{
+            title: 'Albums',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'albums' : 'albums-outline'} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="profile"
           options={{
             title: "Profile",
@@ -85,15 +94,6 @@ export default function TabLayout() {
                 name={focused ? "person" : "person-outline"}
                 color={color}
               />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="albums" // Dodaj nową zakładkę dla Albums
-          options={{
-            title: 'Albums',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'albums' : 'albums-outline'} color={color} />
             ),
           }}
         />

@@ -1,11 +1,11 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Modal, ScrollView, TextInput, useColorScheme, SafeAreaView } from 'react-native';
 import { DataContext } from '@/app/DataContext';
 import { Album } from '../interfaces/albumInterface';
 import { Photo } from '../interfaces/photoInterface';
 
 const Albums = () => {
-  const { albums, photos } = useContext(DataContext) || { albums: [], photos: [] };
+  const { albums, photos, users } = useContext(DataContext) || { albums: [], photos: [], users: [] };
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [albumPhotos, setAlbumPhotos] = useState<Photo[]>([]);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
@@ -13,9 +13,13 @@ const Albums = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [albumSearch, setAlbumSearch] = useState('');
   const [photoSearch, setPhotoSearch] = useState('');
+  const [albumUser, setAlbumUser] = useState<string>('');
+  const [userFilter, setUserFilter] = useState<string>('');
 
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
+
+  const scrollViewRef = useRef<ScrollView | null>(null);
 
   useEffect(() => {
     fetchAllPhotos();
@@ -34,9 +38,16 @@ const Albums = () => {
 
   const handleAlbumPress = (album: Album) => {
     const albumPhotos = filterPhotosByAlbumId(album.id);
+    const user = users.find(user => user.id === album.userId);
     setAlbumPhotos(albumPhotos);
     setSelectedAlbum(album);
+    setAlbumUser(user ? user.name : 'Unknown User');
     setPhotoSearch('');
+
+    // Scroll to top of the screen
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
+    }
   };
 
   const handlePhotoPress = (index: number) => {
@@ -71,23 +82,25 @@ const Albums = () => {
   };
 
   const renderAlbumItem = ({ item }: { item: Album }) => (
-    <TouchableOpacity style={[styles.albumCard, isDarkMode && styles.albumCardDark]} onPress={() => handleAlbumPress(item)}>
-      <Text style={[styles.albumTitle, isDarkMode && styles.albumTitleDark]}>{item.title}</Text>
+    <TouchableOpacity style={[styles.albumCard, isDarkMode ? styles.albumCardDark : null]} onPress={() => handleAlbumPress(item)}>
+      <Text style={[styles.albumTitle, isDarkMode ? styles.albumTitleDark : null]}>{item.title}</Text>
+      <Text style={[styles.albumUser, isDarkMode ? styles.albumUserDark : null]}>{users.find(user => user.id === item.userId)?.name}</Text>
     </TouchableOpacity>
   );
 
   const renderPhotoItem = ({ item, index }: { item: Photo; index: number }) => (
-    <TouchableOpacity onPress={() => handlePhotoPress(index)} style={[styles.photoCard, isDarkMode && styles.photoCardDark]}>
+    <TouchableOpacity onPress={() => handlePhotoPress(index)} style={[styles.photoCard, isDarkMode ? styles.photoCardDark : null]}>
       <Image source={{ uri: item.thumbnailUrl }} style={styles.photoImage} />
-      <View style={[styles.descriptionFrame, isDarkMode && styles.descriptionFrameDark]}>
-        <Text style={[styles.albumName, isDarkMode && styles.albumNameDark]}>Album: {selectedAlbum?.title}</Text>
-        <Text style={[styles.description, isDarkMode && styles.descriptionDark]}>{item.title}</Text>
+      <View style={[styles.descriptionFrame, isDarkMode ? styles.descriptionFrameDark : null]}>
+        <Text style={[styles.albumName, isDarkMode ? styles.albumNameDark : null]}>Album: {selectedAlbum?.title}</Text>
+        <Text style={[styles.description, isDarkMode ? styles.descriptionDark : null]}>{item.title}</Text>
       </View>
     </TouchableOpacity>
   );
 
   const filteredAlbums = albums.filter(album =>
-    album.title.toLowerCase().includes(albumSearch.toLowerCase())
+    album.title.toLowerCase().includes(albumSearch.toLowerCase()) &&
+    (userFilter === '' || users.find(user => user.id === album.userId)?.name.toLowerCase().includes(userFilter.toLowerCase()))
   );
 
   const filteredPhotos = albumPhotos.filter(photo =>
@@ -95,17 +108,24 @@ const Albums = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDarkMode && styles.safeAreaDark]}>
-      <ScrollView contentContainerStyle={[styles.container, isDarkMode && styles.containerDark]}>
-        <Text style={[styles.heading, isDarkMode && styles.headingDark]}>Albums</Text>
+    <SafeAreaView style={[styles.safeArea, isDarkMode ? styles.safeAreaDark : null]}>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={[styles.container, isDarkMode ? styles.containerDark : null]}>
+        <Text style={[styles.heading, isDarkMode ? styles.headingDark : null]}>Albums</Text>
         {!selectedAlbum ? (
           <>
             <TextInput
-              style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
+              style={[styles.searchInput, isDarkMode ? styles.searchInputDark : null]}
               placeholder="Search Albums..."
               placeholderTextColor={isDarkMode ? '#ccc' : '#999'}
               value={albumSearch}
               onChangeText={setAlbumSearch}
+            />
+            <TextInput
+              style={[styles.searchInput, isDarkMode ? styles.searchInputDark : null]}
+              placeholder="Filter by User..."
+              placeholderTextColor={isDarkMode ? '#ccc' : '#999'}
+              value={userFilter}
+              onChangeText={setUserFilter}
             />
             <FlatList
               data={filteredAlbums}
@@ -115,12 +135,13 @@ const Albums = () => {
           </>
         ) : (
           <View>
-            <Text style={[styles.selectedAlbumTitle, isDarkMode && styles.selectedAlbumTitleDark]}>{selectedAlbum.title}</Text>
-            <TouchableOpacity onPress={() => setSelectedAlbum(null)} style={[styles.backButton, isDarkMode && styles.backButtonDark]}>
+            <Text style={[styles.selectedAlbumTitle, isDarkMode ? styles.selectedAlbumTitleDark : null]}>{selectedAlbum.title}</Text>
+            <Text style={[styles.selectedAlbumUser, isDarkMode ? styles.selectedAlbumUserDark : null]}>{albumUser}</Text>
+            <TouchableOpacity onPress={() => setSelectedAlbum(null)} style={[styles.backButton, isDarkMode ? styles.backButtonDark : null]}>
               <Text style={styles.backButtonText}>Back to Albums</Text>
             </TouchableOpacity>
             <TextInput
-              style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
+              style={[styles.searchInput, isDarkMode ? styles.searchInputDark : null]}
               placeholder="Search Photos..."
               placeholderTextColor={isDarkMode ? '#ccc' : '#999'}
               value={photoSearch}
@@ -175,7 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   containerDark: {
-    backgroundColor: '#000000',
+    backgroundColor: '#222',
   },
   heading: {
     fontSize: 24,
@@ -206,13 +227,27 @@ const styles = StyleSheet.create({
   albumTitleDark: {
     color: '#fff',
   },
+  albumUser: {
+    fontSize: 14,
+    color: '#000',
+  },
+  albumUserDark: {
+    color: '#fff',
+  },
   selectedAlbumTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
     marginBottom: 10,
+    fontWeight: 'bold',
     color: '#000',
   },
   selectedAlbumTitleDark: {
+    color: '#fff',
+  },
+  selectedAlbumUser: {
+    fontSize: 16,
+    color: '#000',
+  },
+  selectedAlbumUserDark: {
     color: '#fff',
   },
   photoCard: {
@@ -224,6 +259,9 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     borderWidth: 3,
     borderRadius: 10,
+    maxWidth: "auto",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   photoCardDark: {
     borderColor: '#fff',
