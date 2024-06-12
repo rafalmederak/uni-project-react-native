@@ -14,6 +14,7 @@ type DataContextType = {
   currentUser?: User | null;
   photos: Photo[];
   albums: Album[];
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -39,7 +40,7 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
       .then((response) => response.json())
       .then((data: Album[]) => setAlbums(data))
       .catch((error) => console.error("Error fetching albums:", error));
-      
+
     fetch("https://jsonplaceholder.typicode.com/posts")
       .then((res) => res.json())
       .then((data: Post[]) => setPosts(data));
@@ -50,7 +51,19 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <DataContext.Provider value={{ users, posts, comments, setPosts, setComments, currentUser, photos, albums }}>
+    <DataContext.Provider
+      value={{
+        users,
+        posts,
+        comments,
+        setPosts,
+        setComments,
+        currentUser,
+        setCurrentUser,
+        photos,
+        albums,
+      }}
+    >
       {children}
     </DataContext.Provider>
   );

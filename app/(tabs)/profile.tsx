@@ -7,21 +7,33 @@ import {
   SafeAreaView,
   ScrollView,
   useColorScheme,
+  Button,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import { UserDetailProps } from "../interfaces/profileInterface";
 import { DataContext } from "../DataContext";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-const UserDetail = ({ currentUser }: UserDetailProps) => {
+const UserDetail = () => {
   const context = useContext(DataContext);
+  const router = useRouter();
 
   if (!context) {
     return <Text>Error: User posts not found</Text>;
   }
 
-  const { posts } = context;
+  const { posts, setCurrentUser } = context;
+  const currentUser = useCurrentUser();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === "dark";
   const userPosts = posts.filter((post) => post?.userId === currentUser?.id);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("currentUser");
+    setCurrentUser(null);
+    router.replace("/login");
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode && styles.safeAreaDark]}>
@@ -31,6 +43,7 @@ const UserDetail = ({ currentUser }: UserDetailProps) => {
           isDarkMode && styles.userDetailDark,
         ]}
       >
+        <Button title="Logout" onPress={handleLogout} />
         <Image
           source={require("@/assets/images/usericon.png")}
           style={styles.userImage}
@@ -71,6 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   safeAreaDark: {
+    flex: 1,
     backgroundColor: "#151718",
   },
   userDetail: {
@@ -82,7 +96,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: "#ccc",
     borderWidth: 1,
-    maxWidth: 1200,
     color: "#000000",
   },
   userDetailDark: {
@@ -94,6 +107,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+    marginTop: 20,
     marginBottom: 20,
     padding: 10,
     borderWidth: 3,
