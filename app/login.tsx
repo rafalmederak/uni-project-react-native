@@ -7,6 +7,7 @@ import {
   Alert,
   StyleSheet,
   SafeAreaView,
+  useColorScheme,
 } from "react-native";
 import { DataContext } from "./DataContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -36,21 +37,30 @@ const Login = () => {
     }
   };
 
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === "dark";
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>React Project Uni</Text>
+    <SafeAreaView
+      style={[styles.container, isDarkMode && styles.containerDark]}
+    >
+      <Text style={[styles.title, isDarkMode && styles.titleDark]}>
+        React Project Uni
+      </Text>
       <View style={styles.formWrapper}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode && styles.inputDark]}
           placeholder="Email"
+          placeholderTextColor={isDarkMode ? "#aaaaaa" : "#888888"}
           value={email}
           onChangeText={(text) => setEmail(text)}
           keyboardType="email-address"
           autoCapitalize="none"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode && styles.inputDark]}
           placeholder="Password"
+          placeholderTextColor={isDarkMode ? "#aaaaaa" : "#888888"}
           value={password}
           onChangeText={(text) => setPassword(text)}
           secureTextEntry
@@ -68,9 +78,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
+  containerDark: {
+    backgroundColor: "#151718",
+  },
   title: {
     fontSize: 24,
     marginBottom: 20,
+  },
+  titleDark: {
+    color: "#ffffff",
   },
   formWrapper: {
     width: "100%",
@@ -82,6 +98,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+  },
+  inputDark: {
+    color: "#ffffff",
+    borderColor: "#bbbbbb",
   },
 });
 
