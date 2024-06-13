@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, TextInput, Button, Text, FlatList, StyleSheet, Image, useColorScheme } from "react-native";
+import {
+  View,
+  TextInput,
+  Button,
+  Text,
+  FlatList,
+  StyleSheet,
+  Image,
+  useColorScheme,
+} from "react-native";
 import { DataContext } from "../DataContext";
 import { Post } from "../interfaces/postInterface";
 import { User } from "../interfaces/userInterface";
 import Comments from "../components/comments";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const initialPostState: Post = {
   userId: 0,
@@ -16,13 +26,14 @@ const initialPostState: Post = {
 const Posts = () => {
   const context = useContext(DataContext);
   const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = colorScheme === "dark";
 
   if (!context) {
     return <Text>Error: Data context not found</Text>;
   }
 
-  const { posts, setPosts, users, currentUser } = context;
+  const { posts, setPosts, users } = context;
+  const currentUser = useCurrentUser();
 
   const [newPost, setNewPost] = useState<Post>(initialPostState);
   const [showComments, setShowComments] = useState<number | null>(null);
@@ -72,7 +83,9 @@ const Posts = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.postsContainer, isDarkMode && styles.containerDark]}>
+    <SafeAreaView
+      style={[styles.postsContainer, isDarkMode && styles.containerDark]}
+    >
       <View style={[styles.addPost, isDarkMode && styles.addPostDark]}>
         <TextInput
           style={[styles.addPostInput, isDarkMode && styles.addPostInputDark]}
@@ -95,21 +108,33 @@ const Posts = () => {
         renderItem={({ item }) => (
           <View style={[styles.post, isDarkMode && styles.postDark]}>
             <View style={styles.userInfo}>
-              <Image source={require("@/assets/images/usericon.png")} style={styles.userImage} />
-              <Text style={[styles.userName, isDarkMode && styles.textDark]}>{getUserName(item.userId)}</Text>
+              <Image
+                source={require("@/assets/images/usericon.png")}
+                style={styles.userImage}
+              />
+              <Text style={[styles.userName, isDarkMode && styles.textDark]}>
+                {getUserName(item.userId)}
+              </Text>
             </View>
-            <Text style={[styles.postTitle, isDarkMode && styles.textDark]}>{item.title}</Text>
-            <Text style={[styles.postText, isDarkMode && styles.textDark]}>{item.body}</Text>
+            <Text style={[styles.postTitle, isDarkMode && styles.textDark]}>
+              {item.title}
+            </Text>
+            <Text style={[styles.postText, isDarkMode && styles.textDark]}>
+              {item.body}
+            </Text>
             {item.userId === currentUser?.id && (
-              <Button title="Delete Post" onPress={() => handleDeletePost(item.id)} />
+              <Button
+                title="Delete Post"
+                onPress={() => handleDeletePost(item.id)}
+              />
             )}
             <Button
-              title={showComments === item.id ? "Hide Comments" : "Show Comments"}
+              title={
+                showComments === item.id ? "Hide Comments" : "Show Comments"
+              }
               onPress={() => handleShowComments(item.id)}
             />
-            {showComments === item.id && (
-              <Comments postId={item.id} />
-            )}
+            {showComments === item.id && <Comments postId={item.id} />}
           </View>
         )}
         keyExtractor={(item) => item.id.toString()}
