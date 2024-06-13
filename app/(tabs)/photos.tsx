@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   useColorScheme,
+  SafeAreaView
 } from "react-native";
 import { DataContext } from "@/app/DataContext";
 import { Photo } from "@/app/interfaces/photoInterface";
@@ -18,8 +19,9 @@ const Photos = () => {
   const [searchTermTitle, setSearchTermTitle] = useState<string>("");
   const [searchTermAlbum, setSearchTermAlbum] = useState<string>("");
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
-  const { photos } = useContext(DataContext) || { photos: [] };
   const [albums, setAlbums] = useState<Album[]>([]);
+  const { photos } = useContext(DataContext) || { photos: [] };
+  const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === "dark";
 
@@ -45,13 +47,22 @@ const Photos = () => {
     });
   }, [searchTermTitle, searchTermAlbum, photos, albums]);
 
-  const openModal = (index: number) => setSelectedPhotoIndex(index);
-  const closeModal = () => setSelectedPhotoIndex(null);
+  const openModal = (index: number) => {
+    setSelectedPhotoIndex(index);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setSelectedPhotoIndex(null);
+    setModalVisible(false);
+  };
+
   const goToPreviousPhoto = () => {
     if (selectedPhotoIndex !== null && selectedPhotoIndex > 0) {
       setSelectedPhotoIndex(selectedPhotoIndex - 1);
     }
   };
+
   const goToNextPhoto = () => {
     if (selectedPhotoIndex !== null && selectedPhotoIndex < filteredPhotos.length - 1) {
       setSelectedPhotoIndex(selectedPhotoIndex + 1);
@@ -60,68 +71,81 @@ const Photos = () => {
 
   const renderItem = ({ item, index }: { item: Photo; index: number }) => (
     <TouchableOpacity key={item.id} onPress={() => openModal(index)} style={[styles.photoCard, isDarkMode && styles.photoCardDark]}>
-      <Image source={{ uri: item.url }} style={styles.photoImage} />
-      <View style={styles.descriptionFrame}>
-        <Text style={styles.albumName}>Album: {getAlbumName(item.albumId)}</Text>
-        <Text style={styles.description}>{item.title}</Text>
+      <Image source={{ uri: item.thumbnailUrl }} style={styles.photoImage} />
+      <View style={[styles.descriptionFrame, isDarkMode && styles.descriptionFrameDark]}>
+        <Text style={[styles.albumName, isDarkMode && styles.albumNameDark]}>Album: {getAlbumName(item.albumId)}</Text>
+        <Text style={[styles.description, isDarkMode && styles.descriptionDark]}>{item.title}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={[styles.container, isDarkMode && styles.containerDark]}>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
-          value={searchTermTitle}
-          onChangeText={(text) => setSearchTermTitle(text.toLowerCase())}
-          placeholder="Search by title..."
-          placeholderTextColor={isDarkMode ? "#ccc" : "#888"}
-        />
-        <TextInput
-          style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
-          value={searchTermAlbum}
-          onChangeText={(text) => setSearchTermAlbum(text.toLowerCase())}
-          placeholder="Search by album name..."
-          placeholderTextColor={isDarkMode ? "#ccc" : "#888"}
-        />
-      </View>
-      <ScrollView contentContainerStyle={styles.photosContainer}>
-        {filteredPhotos.map((item, index) => renderItem({ item, index }))}
-      </ScrollView>
-      {selectedPhotoIndex !== null && (
-        <Modal visible={selectedPhotoIndex !== null} transparent>
+    <SafeAreaView style={[styles.safeArea, isDarkMode && styles.safeAreaDark]}>
+      <ScrollView contentContainerStyle={[styles.container, isDarkMode && styles.containerDark]}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
+            value={searchTermTitle}
+            onChangeText={(text) => setSearchTermTitle(text.toLowerCase())}
+            placeholder="Search by title..."
+            placeholderTextColor={isDarkMode ? "#ccc" : "#888"}
+          />
+          <TextInput
+            style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
+            value={searchTermAlbum}
+            onChangeText={(text) => setSearchTermAlbum(text.toLowerCase())}
+            placeholder="Search by album name..."
+            placeholderTextColor={isDarkMode ? "#ccc" : "#888"}
+          />
+        </View>
+        <View style={styles.photosContainer}>
+          {filteredPhotos.map((item, index) => renderItem({ item, index }))}
+        </View>
+        <Modal
+          animationType="none"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={closeModal}
+        >
           <View style={styles.modal}>
-            <TouchableOpacity style={styles.modalClose} onPress={closeModal}>
+            <TouchableOpacity onPress={closeModal} style={styles.modalClose}>
               <Text style={styles.modalCloseText}>×</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={goToPreviousPhoto} style={styles.arrowLeft}>
+              <Text style={styles.arrow}>{"<"}</Text>
+            </TouchableOpacity>
             <View style={styles.modalContent}>
-              <TouchableOpacity onPress={goToPreviousPhoto}>
-                <Text style={styles.arrow}>←</Text>
-              </TouchableOpacity>
-              <Image
-                source={{ uri: filteredPhotos[selectedPhotoIndex].url }}
-                style={styles.modalImage}
-              />
-              <TouchableOpacity onPress={goToNextPhoto}>
-                <Text style={styles.arrow}>→</Text>
-              </TouchableOpacity>
+              {selectedPhotoIndex !== null && (
+                <Image
+                  source={{ uri: filteredPhotos[selectedPhotoIndex]?.url }}
+                  style={styles.modalImage}
+                />
+              )}
             </View>
+            <TouchableOpacity onPress={goToNextPhoto} style={styles.arrowRight}>
+              <Text style={styles.arrow}>{">"}</Text>
+            </TouchableOpacity>
           </View>
         </Modal>
-      )}
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  safeAreaDark: {
+    backgroundColor: '#000000',
+  },
+  container: {
     padding: 20,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
   },
   containerDark: {
-    backgroundColor: "#151718",
+    backgroundColor: '#222',
   },
   searchContainer: {
     textAlign: "center",
@@ -143,23 +167,25 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   photosContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   photoCard: {
     width: 300,
     height: 350,
-    margin: 25,
-    position: "relative",
-    overflow: "hidden",
-    borderColor: "#000",
+    margin: 10,
+    position: 'relative',
+    overflow: 'hidden',
+    borderColor: '#000',
     borderWidth: 3,
     borderRadius: 10,
+    maxWidth: "auto",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   photoCardDark: {
-    borderColor: "#555",
-    backgroundColor: "#ffffff",
+    borderColor: '#fff',
   },
   photoImage: {
     width: "100%",
@@ -170,41 +196,60 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#ffffff", 
   },
+  descriptionFrameDark: {
+    backgroundColor: '#222',
+  },
   albumName: {
     fontWeight: "bold",
+    color: '#000',
+  },
+  albumNameDark: {
+    color: '#fff',
   },
   description: {
     marginTop: 5,
     color: "#555",
   },
+  descriptionDark: {
+    color: '#ccc',
+  },
   modal: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   modalClose: {
-    position: "absolute",
+    position: 'absolute',
     top: 40,
     right: 20,
     zIndex: 1,
   },
   modalCloseText: {
     fontSize: 30,
-    color: "#fff",
+    color: '#fff',
   },
   modalContent: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   modalImage: {
     width: 300,
     height: 300,
   },
+  arrowLeft: {
+    position: 'absolute',
+    left: 10,
+    zIndex: 1,
+  },
+  arrowRight: {
+    position: 'absolute',
+    right: 10,
+    zIndex: 1,
+  },
   arrow: {
     fontSize: 30,
-    color: "#fff",
-    padding: 20,
+    color: '#fff',
   },
 });
 
