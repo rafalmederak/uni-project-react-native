@@ -29,30 +29,6 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="explore"
-          options={{
-            title: "Explore",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "code-slash" : "code-slash-outline"}
-                color={color}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="users"
-          options={{
-            title: "Users",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "people" : "people-outline"}
-                color={color}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="posts"
           options={{
             title: "Posts",
@@ -71,6 +47,18 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
                 name={focused ? "image" : "image-outline"}
+                color={color}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="users"
+          options={{
+            title: "Users",
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon
+                name={focused ? "people" : "people-outline"}
                 color={color}
               />
             ),
