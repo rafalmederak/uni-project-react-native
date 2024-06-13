@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, TextInput, Button, Text, FlatList, StyleSheet, Image, useColorScheme } from "react-native";
+import {
+  View,
+  TextInput,
+  Button,
+  Text,
+  FlatList,
+  StyleSheet,
+  Image,
+  useColorScheme,
+} from "react-native";
 import { DataContext } from "../DataContext";
 import { Comment } from "../interfaces/commentInterface";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const initialCommentState: Comment = {
   postId: 0,
@@ -15,13 +25,14 @@ const initialCommentState: Comment = {
 const Comments = ({ postId }: { postId: number }) => {
   const context = useContext(DataContext);
   const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = colorScheme === "dark";
 
   if (!context) {
     return <Text>Error: Data context not found</Text>;
   }
 
-  const { comments, setComments, currentUser } = context;
+  const { comments, setComments } = context;
+  const currentUser = useCurrentUser();
 
   const [newComment, setNewComment] = useState<Comment>(initialCommentState);
 
@@ -68,17 +79,25 @@ const Comments = ({ postId }: { postId: number }) => {
   );
 
   return (
-    <SafeAreaView style={[styles.commentsSection, isDarkMode && styles.commentsSectionDark]}>
+    <SafeAreaView
+      style={[styles.commentsSection, isDarkMode && styles.commentsSectionDark]}
+    >
       <View style={[styles.addComment, isDarkMode && styles.addCommentDark]}>
         <TextInput
-          style={[styles.addCommentInput, isDarkMode && styles.addCommentInputDark]}
+          style={[
+            styles.addCommentInput,
+            isDarkMode && styles.addCommentInputDark,
+          ]}
           placeholder="Enter comment title"
           placeholderTextColor={isDarkMode ? "#ccc" : "#888"}
           value={newComment.name}
           onChangeText={(text) => handleInputChange("name", text)}
         />
         <TextInput
-          style={[styles.addCommentInput, isDarkMode && styles.addCommentInputDark]}
+          style={[
+            styles.addCommentInput,
+            isDarkMode && styles.addCommentInputDark,
+          ]}
           placeholder="Enter comment text"
           placeholderTextColor={isDarkMode ? "#ccc" : "#888"}
           value={newComment.body}
@@ -91,13 +110,27 @@ const Comments = ({ postId }: { postId: number }) => {
         renderItem={({ item }) => (
           <View style={[styles.comment, isDarkMode && styles.commentDark]}>
             <View style={styles.commentUserInfo}>
-              <Image source={require("@/assets/images/usericon.png")} style={styles.commentImage} />
-              <Text style={[styles.commentEmail, isDarkMode && styles.textDark]}>{item.email}</Text>
+              <Image
+                source={require("@/assets/images/usericon.png")}
+                style={styles.commentImage}
+              />
+              <Text
+                style={[styles.commentEmail, isDarkMode && styles.textDark]}
+              >
+                {item.email}
+              </Text>
             </View>
-            <Text style={[styles.commentTitle, isDarkMode && styles.textDark]}>{item.name}</Text>
-            <Text style={[styles.commentBody, isDarkMode && styles.textDark]}>{item.body}</Text>
+            <Text style={[styles.commentTitle, isDarkMode && styles.textDark]}>
+              {item.name}
+            </Text>
+            <Text style={[styles.commentBody, isDarkMode && styles.textDark]}>
+              {item.body}
+            </Text>
             {item.email === currentUser?.email && (
-              <Button title="Delete Comment" onPress={() => handleDeleteComment(item.id)} />
+              <Button
+                title="Delete Comment"
+                onPress={() => handleDeleteComment(item.id)}
+              />
             )}
           </View>
         )}
