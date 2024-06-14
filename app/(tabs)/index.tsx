@@ -1,12 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DataContext } from "../DataContext";
+import { Post } from "../interfaces/postInterface";
 
 const Home = () => {
   const context = useContext(DataContext);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === "dark";
+  const [latestPost, setLatestPost] = useState<Post | null>(null);
 
   if (!context) {
     return <Text>Error: Data context not found</Text>;
@@ -14,12 +16,18 @@ const Home = () => {
 
   const { posts, users } = context;
 
+  useEffect(() => {
+    if (posts.length) {
+      setLatestPost(posts[0]);
+    }
+  }, [posts]);
+
   const getUserName = (userId: number) => {
     const user = users.find((user) => user.id === userId);
     return user?.name || "Unknown User";
   };
 
-  if (!posts.length) {
+  if (!latestPost) {
     return (
       <SafeAreaView
         style={[styles.container, isDarkMode && styles.containerDark]}
@@ -41,8 +49,6 @@ const Home = () => {
       </SafeAreaView>
     );
   }
-
-  const latestPost = posts[posts.length - 1];
 
   return (
     <SafeAreaView

@@ -42,7 +42,7 @@ const Posts = () => {
     const maxId = Math.max(...posts.map((post) => post.id));
     setNewPost((prevNewPost) => ({
       ...prevNewPost,
-      id: maxId,
+      id: maxId + 1,
     }));
   }, [posts]);
 
@@ -54,16 +54,17 @@ const Posts = () => {
   };
 
   const handleAddPost = () => {
-    const maxId = Math.max(...posts.map((post) => post.id));
-    const newPostWithId: Post = {
-      ...newPost,
-      id: maxId + 1,
-      userId: currentUser?.id || 0,
-    };
     if (newPost.title.trim() === "" || newPost.body.trim() === "") {
       alert("Title and body are required!");
       return;
     }
+
+    const newPostWithId: Post = {
+      ...newPost,
+      id: newPost.id + 1,
+      userId: currentUser?.id || 0,
+    };
+
     setPosts([newPostWithId, ...posts]);
     setNewPost(initialPostState);
   };
@@ -123,17 +124,21 @@ const Posts = () => {
               {item.body}
             </Text>
             {item.userId === currentUser?.id && (
-              <Button
-                title="Delete Post"
-                onPress={() => handleDeletePost(item.id)}
-              />
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Delete Post"
+                  onPress={() => handleDeletePost(item.id)}
+                />
+              </View>
             )}
-            <Button
-              title={
-                showComments === item.id ? "Hide Comments" : "Show Comments"
-              }
-              onPress={() => handleShowComments(item.id)}
-            />
+            <View style={styles.buttonContainer}>
+              <Button
+                title={
+                  showComments === item.id ? "Hide Comments" : "Show Comments"
+                }
+                onPress={() => handleShowComments(item.id)}
+              />
+            </View>
             {showComments === item.id && <Comments postId={item.id} />}
           </View>
         )}
@@ -214,6 +219,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#333333",
     borderColor: "#555",
     color: "#ffffff",
+  },
+  buttonContainer: {
+    marginTop: 10,
   },
 });
 

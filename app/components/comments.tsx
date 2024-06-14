@@ -202,8 +202,10 @@ const styles = StyleSheet.create({
   },
   commentBody: {
     marginTop: 10,
+    marginBottom:10,
     borderRadius: 5,
     color: "#000000",
+
   },
   commentImage: {
     width: 20,
